@@ -16,7 +16,7 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "raweid-service"
+      "service": "raweid"
     }
   ]
 }
