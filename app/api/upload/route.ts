@@ -14,6 +14,13 @@ export async function POST(request: Request) {
   if (typeof folder !== "string" || !ALLOWED_FOLDERS.has(folder)) {
     return NextResponse.json({ error: "Dossier de destination invalide." }, { status: 400 });
   }
+  if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    console.error("[Cloudinary Error] Missing CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET env vars.");
+    return NextResponse.json(
+      { error: "Configuration Cloudinary manquante côté serveur (variables d'environnement)." },
+      { status: 500 }
+    );
+  }
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const dataUri = `data:${file.type};base64,${buffer.toString("base64")}`;
@@ -25,7 +32,12 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ url: result.secure_url });
   } catch (err) {
-    console.error("[Cloudinary Error] upload:", err);
-    return NextResponse.json({ error: "Échec du téléversement vers Cloudinary." }, { status: 502 });
+    const reason = err instanceof Error ? err.message : String((err as { message?: unknown })?.message ?? err);
+    console.error("[Cloudinary Error] upload:", reason, err);
+    const message =
+      process.env.NODE_ENV === "production"
+        ? "Échec du téléversement vers Cloudinary."
+        : `Échec du téléversement vers Cloudinary : ${reason}`;
+    return NextResponse.json({ error: message }, { status: 502 });
   }
 }
