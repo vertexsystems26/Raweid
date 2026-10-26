@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fcfbf9;
+  --foreground: #1c241f;
+
+  /* RAWeiD Palette Institutionnelle */
+  --color-raweid-forest: #1b4d3e;
+  --color-raweid-vegetal: #2e8b57;
+  --color-raweid-gold: #c49a45;
+  --color-raweid-earth: #8c6239;
+  --color-raweid-cream: #f7f5ef;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Utilitaires pour les dégradés et accents agronomiques */
+.bg-raweid-forest {
+  background-color: #1b4d3e;
+}
+
+.text-raweid-forest {
+  color: #1b4d3e;
+}
+
+.bg-raweid-gold {
+  background-color: #c49a45;
+}
+
+.text-raweid-gold {
+  color: #c49a45;
+}
+
+.border-raweid-gold {
+  border-color: #c49a45;
+}
+
+.bg-raweid-vegetal {
+  background-color: #2e8b57;
+}
+
+.text-raweid-vegetal {
+  color: #2e8b57;
+}
+
+.gradient-raweid-hero {
+  background: linear-gradient(135deg, #103328 0%, #1b4d3e 50%, #205c4a 100%);
+}

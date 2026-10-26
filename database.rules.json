@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "services": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "products": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "videos": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "candidates": {
+      ".read": "auth != null",
+      "$candidateId": {
+        ".write": "auth != null || !data.exists()"
+      }
+    }
+  }
+}
