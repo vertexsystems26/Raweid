@@ -16,6 +16,7 @@ import {
   updateProduct,
   deleteProduct,
   uploadImage,
+  deleteImage,
   type ProductRecord,
   type ProductTargetAnimal,
 } from "@/lib/firebase-service";
@@ -100,9 +101,10 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (product: ProductRecord) => {
     if (!confirm("Supprimer ce produit ?")) return;
-    await deleteProduct(id);
+    await deleteProduct(product.id);
+    await deleteImage(product.imageUrl);
     loadProducts();
   };
 
@@ -169,7 +171,7 @@ export default function AdminProductsPage() {
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => handleDelete(product.id)}
+                    onClick={() => handleDelete(product)}
                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />

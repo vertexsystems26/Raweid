@@ -97,8 +97,8 @@ function snapshotToArray<T>(snap: Record<string, unknown> | null): (T & { id: st
   }));
 }
 
-// Uploads via our server-side /api/upload route (Cloudinary) rather than calling
-// Cloudinary's SDK from the browser, since that would require exposing api_secret.
+// Uploads via our server-side /api/upload route (Cloudflare R2) rather than
+// writing to R2 from the browser, since that would require exposing the secret key.
 export async function uploadImage(file: File, folder: "services" | "products" | "courses"): Promise<string> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20000);
@@ -121,6 +121,21 @@ export async function uploadImage(file: File, folder: "services" | "products" | 
     throw err;
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+// Best-effort: removes the underlying R2 object for a previously uploaded image.
+// Ignored on failure since the DB record removal is what matters for the admin.
+export async function deleteImage(url: string | null): Promise<void> {
+  if (!url) return;
+  try {
+    await fetch("/api/upload", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+  } catch {
+    // ignore
   }
 }
 

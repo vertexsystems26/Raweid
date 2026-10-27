@@ -21,6 +21,7 @@ import {
   updateCourse,
   deleteCourse,
   uploadImage,
+  deleteImage,
   type ServiceRecord,
   type ServiceCategory,
   type CourseRecord,
@@ -127,9 +128,10 @@ export default function AdminServicesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (service: ServiceRecord) => {
     if (!confirm("Supprimer ce service ?")) return;
-    await deleteService(id);
+    await deleteService(service.id);
+    await deleteImage(service.imageUrl);
     loadServices();
   };
 
@@ -200,10 +202,11 @@ export default function AdminServicesPage() {
     }
   };
 
-  const handleCourseDelete = async (id: string) => {
+  const handleCourseDelete = async (course: CourseRecord) => {
     if (!confirm("Supprimer cette formation ?")) return;
-    await deleteCourse(id);
-    setCourses((prev) => prev.filter((c) => c.id !== id));
+    await deleteCourse(course.id);
+    await deleteImage(course.imageUrl);
+    setCourses((prev) => prev.filter((c) => c.id !== course.id));
   };
 
   return (
@@ -262,7 +265,7 @@ export default function AdminServicesPage() {
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => handleDelete(service.id)}
+                    onClick={() => handleDelete(service)}
                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -576,7 +579,7 @@ export default function AdminServicesPage() {
                             <Pencil className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleCourseDelete(course.id)}
+                            onClick={() => handleCourseDelete(course)}
                             className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
