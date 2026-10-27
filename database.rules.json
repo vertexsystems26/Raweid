@@ -8,6 +8,10 @@
       ".read": true,
       ".write": "auth != null"
     },
+    "courses": {
+      ".read": true,
+      ".write": "auth != null"
+    },
     "videos": {
       ".read": true,
       ".write": "auth != null"

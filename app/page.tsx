@@ -7,10 +7,12 @@ import { VideoGallery } from "@/components/marketing/video-gallery";
 import { PolesSection } from "@/components/marketing/poles-section";
 import { CandidateRegistrationForm } from "@/components/marketing/candidate-registration-form";
 import { Footer } from "@/components/marketing/footer";
+import { TrainingSelectionProvider } from "@/components/marketing/training-selection-context";
 import { Award, BookOpen, Users2, Leaf } from "lucide-react";
 
 export default function HomePage() {
   return (
+    <TrainingSelectionProvider>
     <div className="min-h-screen flex flex-col bg-[#FCFBF9]">
       {/* 1. Header & Navigation */}
       <Navbar />
@@ -62,5 +64,6 @@ export default function HomePage() {
       {/* 8. Footer Institutionnel */}
       <Footer />
     </div>
+    </TrainingSelectionProvider>
   );
 }

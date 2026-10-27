@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cloudinary } from "@/lib/cloudinary";
 
-const ALLOWED_FOLDERS = new Set(["services", "products"]);
+const ALLOWED_FOLDERS = new Set(["services", "products", "courses"]);
 
 export async function POST(request: Request) {
   const formData = await request.formData();

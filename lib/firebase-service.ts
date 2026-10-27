@@ -25,6 +25,21 @@ export type ServiceRecord = {
   createdAt: string;
 };
 
+export type CourseStatus = "Ouvert" | "Bientôt disponible";
+
+export type CourseRecord = {
+  id: string;
+  serviceId: string;
+  title: string;
+  description: string;
+  duration: string;
+  targetAudience: string;
+  imageUrl: string | null;
+  price: string;
+  status: CourseStatus;
+  createdAt: string;
+};
+
 export type ProductTargetAnimal = "Bovins" | "Vaches laitières" | "Ovins" | "Caprins";
 
 export type ProductRecord = {
@@ -63,6 +78,7 @@ export type CandidateRecord = {
   email: string | null;
   governorate: string;
   selectedService: "TRAINING" | "AGRI_CONSULTING" | "INVESTOR_SUPPORT" | "FEED_MANUFACTURING";
+  courseId: string | null;
   projectDetails: string | null;
   status: CandidateStatus;
   notes: Array<{ id: string } & CandidateNote>;
@@ -83,7 +99,7 @@ function snapshotToArray<T>(snap: Record<string, unknown> | null): (T & { id: st
 
 // Uploads via our server-side /api/upload route (Cloudinary) rather than calling
 // Cloudinary's SDK from the browser, since that would require exposing api_secret.
-export async function uploadImage(file: File, folder: "services" | "products"): Promise<string> {
+export async function uploadImage(file: File, folder: "services" | "products" | "courses"): Promise<string> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20000);
 
@@ -130,6 +146,35 @@ export async function updateService(id: string, data: Partial<Omit<ServiceRecord
 
 export async function deleteService(id: string): Promise<void> {
   await remove(ref(db, `services/${id}`));
+}
+
+// ============================================================
+// /courses (sous-catégories de formations, rattachées à un service)
+// ============================================================
+
+export async function getCourses(): Promise<CourseRecord[]> {
+  const snap = await get(ref(db, "courses"));
+  const list = snapshotToArray<Omit<CourseRecord, "id">>(snap.val());
+  return list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function getCoursesByServiceId(serviceId: string): Promise<CourseRecord[]> {
+  const all = await getCourses();
+  return all.filter((course) => course.serviceId === serviceId);
+}
+
+export async function addCourse(data: Omit<CourseRecord, "id" | "createdAt">): Promise<string> {
+  const newRef = push(ref(db, "courses"));
+  await set(newRef, { ...data, createdAt: new Date().toISOString() });
+  return newRef.key as string;
+}
+
+export async function updateCourse(id: string, data: Partial<Omit<CourseRecord, "id">>): Promise<void> {
+  await update(ref(db, `courses/${id}`), data);
+}
+
+export async function deleteCourse(id: string): Promise<void> {
+  await remove(ref(db, `courses/${id}`));
 }
 
 // ============================================================
@@ -193,6 +238,7 @@ function candidateFromSnapshotValue(id: string, value: any): CandidateRecord {
     email: value.email ?? null,
     governorate: value.governorate,
     selectedService: value.selectedService,
+    courseId: value.courseId ?? null,
     projectDetails: value.projectDetails ?? null,
     status: value.status,
     createdAt: value.createdAt,
@@ -217,6 +263,7 @@ export type NewCandidateInput = {
   email?: string | null;
   governorate: string;
   selectedService: CandidateRecord["selectedService"];
+  courseId?: string | null;
   projectDetails?: string | null;
 };
 
@@ -229,6 +276,7 @@ export async function addCandidate(data: NewCandidateInput): Promise<string> {
     email: data.email || null,
     governorate: data.governorate,
     selectedService: data.selectedService,
+    courseId: data.courseId || null,
     projectDetails: data.projectDetails || null,
     status: "NEW" as CandidateStatus,
     createdAt: new Date().toISOString(),
@@ -282,6 +330,7 @@ export async function createCandidateAdmin(data: CreateCandidateAdminInput): Pro
     email: data.email || null,
     governorate: data.governorate,
     selectedService: data.selectedService,
+    courseId: data.courseId || null,
     projectDetails: data.projectDetails || null,
     status: data.status || "NEW",
     createdAt,

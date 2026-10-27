@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -9,7 +9,8 @@ import {
   TUNISIAN_GOVERNORATES,
 } from "@/lib/validators/candidate.schema";
 import { addCandidate } from "@/lib/firebase-service";
-import { CheckCircle2, AlertCircle, Loader2, Send, Sparkles } from "lucide-react";
+import { useTrainingSelection } from "@/components/marketing/training-selection-context";
+import { CheckCircle2, AlertCircle, Loader2, Send, Sparkles, GraduationCap, X } from "lucide-react";
 
 export function CandidateRegistrationForm() {
   const [isPending, startTransition] = useTransition();
@@ -17,11 +18,14 @@ export function CandidateRegistrationForm() {
     type: "success" | "error";
     message: string;
   } | null>(null);
+  const { selectedTraining, clearTraining } = useTrainingSelection();
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
+    getValues,
     formState: { errors },
   } = useForm<CandidateInput>({
     resolver: zodResolver(candidateSchema),
@@ -31,9 +35,19 @@ export function CandidateRegistrationForm() {
       email: "",
       governorate: "Siliana",
       serviceRequested: "TRAINING",
+      courseId: "",
       projectDetails: "",
     },
   });
+
+  useEffect(() => {
+    if (!selectedTraining) return;
+    setValue("serviceRequested", "TRAINING");
+    setValue("courseId", selectedTraining.courseId);
+    if (!getValues("projectDetails")?.trim()) {
+      setValue("projectDetails", `Formation souhaitée : ${selectedTraining.title}`);
+    }
+  }, [selectedTraining, setValue, getValues]);
 
   const onSubmit = (values: CandidateInput) => {
     setFeedback(null);
@@ -45,6 +59,7 @@ export function CandidateRegistrationForm() {
           email: values.email || null,
           governorate: values.governorate,
           selectedService: values.serviceRequested,
+          courseId: values.courseId || null,
           projectDetails: values.projectDetails || null,
         });
         setFeedback({
@@ -53,6 +68,7 @@ export function CandidateRegistrationForm() {
             "Votre demande a été enregistrée avec succès. Notre équipe agronomique vous contactera dans les plus brefs délais.",
         });
         reset();
+        clearTraining();
       } catch {
         setFeedback({
           type: "error",
@@ -97,7 +113,29 @@ export function CandidateRegistrationForm() {
         </div>
       )}
 
+      {selectedTraining && (
+        <div className="mb-6 p-4 rounded-xl bg-[#1B4D3E]/5 border border-[#1B4D3E]/20 flex items-start gap-3">
+          <GraduationCap className="w-5 h-5 mt-0.5 text-[#1B4D3E] shrink-0" />
+          <div className="flex-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#1B4D3E]">Formation sélectionnée</p>
+            <p className="text-sm font-semibold text-stone-800 mt-0.5">{selectedTraining.title}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              clearTraining();
+              setValue("courseId", "");
+            }}
+            className="text-stone-400 hover:text-stone-700 cursor-pointer"
+            title="Retirer la formation sélectionnée"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <input type="hidden" {...register("courseId")} />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
