@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "name": "raweid-service",
+  "name": "raweid",
   "compatibility_date": "2026-10-20",
   "compatibility_flags": [
     // Required: lets the Worker run Next.js/Firebase's Node.js-dependent code.
@@ -9,6 +9,12 @@
     "nodejs_compat",
     "global_fetch_strictly_public"
   ],
+  "vars": {
+    // Non-secret: committed on purpose so it survives every `wrangler deploy`
+    // without needing to be re-entered in the dashboard.
+    "R2_BUCKET_NAME": "raweid-storage",
+    "NEXT_PUBLIC_R2_PUBLIC_URL": "https://pub-a840a1f338af49f88c2bf2f202120319.r2.dev"
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
